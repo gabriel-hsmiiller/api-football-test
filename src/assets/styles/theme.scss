@@ -1,0 +1,77 @@
+@use '@angular/material' as mat;
+@import '@angular/material/theming';
+
+@include mat-core(); 
+
+$green-palette: (
+    50 : #e1ebe0,
+    100 : #b5cdb3,
+    200 : #83ab80,
+    300 : #51894d,
+    400 : #2c7026,
+    500 : #075700,
+    600 : #064f00,
+    700 : #054600,
+    800 : #043c00,
+    900 : #022c00,
+    A100 : #65ff65,
+    A200 : #32ff32,
+    A400 : #00fe00,
+    A700 : #00e500,
+    contrast: (
+        50 : #000000,
+        100 : #000000,
+        200 : #000000,
+        300 : #ffffff,
+        400 : #ffffff,
+        500 : #ffffff,
+        600 : #ffffff,
+        700 : #ffffff,
+        800 : #ffffff,
+        900 : #ffffff,
+        A100 : #000000,
+        A200 : #000000,
+        A400 : #000000,
+        A700 : #000000,
+    )
+);
+
+$blue-palette: (
+    50 : #e5ebf1,
+    100 : #becddd,
+    200 : #93acc6,
+    300 : #678baf,
+    400 : #47729d,
+    500 : #26598c,
+    600 : #225184,
+    700 : #1c4879,
+    800 : #173e6f,
+    900 : #0d2e5c,
+    A100 : #91b9ff,
+    A200 : #5e99ff,
+    A400 : #2b79ff,
+    A700 : #1269ff,
+    contrast: (
+        50 : #000000,
+        100 : #000000,
+        200 : #000000,
+        300 : #000000,
+        400 : #ffffff,
+        500 : #ffffff,
+        600 : #ffffff,
+        700 : #ffffff,
+        800 : #ffffff,
+        900 : #ffffff,
+        A100 : #000000,
+        A200 : #000000,
+        A400 : #ffffff,
+        A700 : #ffffff,
+    )
+);
+
+$mt-primary: mat-palette($green-palette);
+$mt-accent: mat-palette($blue-palette);
+
+$mt-theme: mat-light-theme($mt-primary, $mt-accent);
+
+@include angular-material-theme($mt-theme);

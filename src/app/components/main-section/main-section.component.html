@@ -1,0 +1,58 @@
+<section #section class="w-100 p-4">
+    <div class="d-flex flex-md-row flex-sm-column">
+        <div class="mx-3">
+            <mat-form-field class="d-flex flex-column align-items-stretch" appearance="outline">
+                <mat-label>Selecione um país</mat-label>
+                <mat-select [(value)]="mainSectionService.selectedCountry" (selectionChange)="onSelectCountry()">
+                    <mat-option [value]="country.code" *ngFor="let country of (mainSectionService.countries$ | async)">{{ country.name }}</mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field class="d-flex flex-column align-items-stretch" appearance="outline">
+                <mat-label>Selecione uma liga</mat-label>
+                <mat-select [(value)]="mainSectionService.selectedLeague" (selectionChange)="onSelectLeague()" [disabled]="!mainSectionService.selectedCountry">
+                    <mat-option [value]="league.id" *ngFor="let league of (mainSectionService.leagues$ | async)">{{ league.name }}</mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field class="d-flex flex-column align-items-stretch" appearance="outline">
+                <mat-label>Selecione um time</mat-label>
+                <mat-select [(value)]="mainSectionService.selectedTeam" (selectionChange)="onSelectTeam()" [disabled]="!mainSectionService.selectedLeague">
+                    <mat-option [value]="team.id" *ngFor="let team of (mainSectionService.teams$ | async)">{{ team.name }}</mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field class="d-flex flex-column align-items-stretch" appearance="outline">
+                <mat-label>Selecione uma temporada</mat-label>
+                <mat-select [(value)]="mainSectionService.selectedSeason" [disabled]="!mainSectionService.selectedLeague">
+                    <mat-option [value]="season" *ngFor="let season of (mainSectionService.seasons$ | async)">Ano {{ season }}</mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+        <mat-divider [vertical]="true"></mat-divider>
+        <div class="flex-grow-1">
+            <mat-tab-group dynamicHeight color="primary" animationDuration="0ms">
+                <mat-tab label="Jogadores">
+                    <div class="p-2">
+                        Jogadores
+                    </div>
+                </mat-tab>
+                <mat-tab label="Formações utilizadas">
+                    <div class="p-2">
+                        Formações utilizadas
+                    </div>
+                </mat-tab>
+                <mat-tab label="Resultados">
+                    <div class="p-2">
+                        Resultados
+                    </div>
+                </mat-tab>
+                <mat-tab label="Gols">
+                    <div class="p-2">
+                        Gols
+                    </div>
+                </mat-tab>
+            </mat-tab-group>
+        </div>
+    </div>
+</section>

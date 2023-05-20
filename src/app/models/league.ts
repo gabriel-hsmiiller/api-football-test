@@ -3,5 +3,4 @@ export interface ILeague {
     name: string;
     logo: string;
     countryCode: string;
-    seasons: Array<number>;
 }

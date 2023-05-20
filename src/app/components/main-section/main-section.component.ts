@@ -21,11 +21,11 @@ export class MainSectionComponent implements OnInit {
 
   onSelectLeague() {
     this.mainSectionService.getAllTeamsFromLeague();
-    this.mainSectionService.getAllSeasonsFromLeague();
   }
 
   onSelectTeam() {
     this.mainSectionService.getAllSeasonsFromTeam();
+    this.mainSectionService.getAllPlayersFromTeam();
   }
 
 }

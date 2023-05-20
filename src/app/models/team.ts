@@ -1,15 +1,12 @@
 import { IGoal } from './goal';
 import { ILineup } from './lineup';
 
-export interface ITeam {
+export interface ITeam extends ITeamDetails {
+    _idb?: number;
     id: number;
     name: string;
     logo: string;
     leagueId: number;
-    seasons: Array<number>;
-    lineups: Array<ILineup>;
-    goals: IGoal;
-    statistics: ITeamStatistics;
 }
 
 export interface ITeamStatistics {
@@ -17,4 +14,11 @@ export interface ITeamStatistics {
     wins: number;
     losses: number;
     draws: number;
+}
+
+export interface ITeamDetails {
+    season: number;
+    lineups: Array<ILineup>;
+    goals: IGoal;
+    statistics: ITeamStatistics;
 }

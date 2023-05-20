@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http'
-import { BehaviorSubject, firstValueFrom, map, catchError } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { ICountry } from 'src/app/models/country';
 import { ILeague } from 'src/app/models/league';
-import { ITeam } from 'src/app/models/team';
-import { db } from 'src/app/common/indexed-db';
+import { ITeam, ITeamDetails } from 'src/app/models/team';
 import { IPlayer } from 'src/app/models/player';
+import { FetchApiService } from 'src/app/common/fetch-api.service';
+import { IndexedDbService } from 'src/app/common/indexed-db.service';
 
 @Injectable({
   providedIn: 'root'
@@ -17,158 +17,94 @@ export class MainSectionService {
   public teams$: BehaviorSubject<Array<ITeam>> = new BehaviorSubject<Array<ITeam>>([]);
   public seasons$: BehaviorSubject<Array<number>> = new BehaviorSubject<Array<number>>([]);
   public players$: BehaviorSubject<Array<IPlayer>> = new BehaviorSubject<Array<IPlayer>>([]);
+  public selectedTeamInformation$: BehaviorSubject<ITeam | null> = new BehaviorSubject<ITeam | null>(null);
 
   public selectedCountry: string | null = null;
   public selectedLeague: number | null = null;
   public selectedTeam: number | null = null;
   public selectedSeason: number | null = null;
 
-  constructor(private http: HttpClient) { }
+  constructor(private fetchApi: FetchApiService, private db: IndexedDbService) { }
 
   async getAllCountries() {
-    let countries = [];
+    let countries: Array<ICountry> = [];
 
-    countries = await db.getCountries();
+    countries = await this.db.getCountries();
 
     if (!countries || countries.length <= 0) {
-      countries = await this.fetchCountries();
-      db.addCountries(countries);
+      countries = await firstValueFrom(this.fetchApi.fetchCountries());
+      await this.db.addCountries(countries);
     }
 
     this.countries$.next(countries);
   }
 
   async getAllLeaguesFromCountry() {
-    let leagues = [];
+    let leagues: Array<ILeague> = [];
 
-    leagues = await db.getLeaguesFromCountry(this.selectedCountry!);
+    leagues = await this.db.getLeaguesFromCountry(this.selectedCountry!);
 
     if (!leagues || leagues.length <= 0) {
-      leagues = await this.fetchLeaguesFromCountry();
-      db.addLeagues(leagues);
+      leagues = await firstValueFrom(this.fetchApi.fetchLeaguesFromCountry(this.selectedCountry!));
+      await this.db.addLeagues(leagues);
     }
 
     this.leagues$.next(leagues);
   }
 
   async getAllTeamsFromLeague() {
-    let teams = [];
+    let teams: Array<ITeam> = [];
     
-    teams = await db.getTeamsFromLeague(this.selectedLeague!);
+    teams = await this.db.getTeamsFromLeague(this.selectedLeague!, this.selectedSeason!);
 
     if (!teams || teams.length <= 0) {
-      teams = await this.fetchTeamsFromLeague();
-      db.addTeams(teams);
+      teams = await firstValueFrom(this.fetchApi.fetchTeamsFromLeague(this.selectedLeague!, this.selectedSeason!));
+      await this.db.addTeams(teams);
     }
 
     this.teams$.next(teams);
   }
 
-  async getAllSeasonsFromTeam() {
-    let seasons = [];
+  async getDetailsFromTeam() {
+    let team: ITeam | null = null;
+
+    team = await this.db.getTeamInfo(this.selectedTeam!, this.selectedSeason!) || null;
+
+    const _idb = team?._idb;
+
+    if (team && (!team.lineups || !team.goals || !team.season || !team.statistics)) {
+      team = await firstValueFrom(this.fetchApi.fetchDetailsFromTeam(this.selectedTeam!, this.selectedLeague!, this.selectedSeason!));
+      const details: ITeamDetails = { season: team.season, lineups: team.lineups, goals: team.goals, statistics: team.statistics };
+      await this.db.addDetailsToTeam(_idb!, details);
+    }
+
+    this.selectedTeamInformation$.next(team);
+  }
+
+  async getAllSeasonsFromLeague() {
+    let seasons: Array<number> = [];
     
-    seasons = await db.getSeasonsFromTeam(this.selectedSeason!) || [];
+    seasons = await this.db.getSeasonsFromLeague(this.selectedLeague!) || [];
 
     if (!seasons || seasons.length <= 0) {
-      seasons = await this.fetchSeasonsFromTeam();
-      db.addSeasonsToTeam(this.selectedTeam!, seasons);
+      seasons = await firstValueFrom(this.fetchApi.fetchSeasonsFromLeague());
+      await this.db.addSeasonsToLeague(this.selectedLeague!, seasons);
     }
 
     this.seasons$.next(seasons);
   }
 
   async getAllPlayersFromTeam() {
-    let players = [];
+    let players: Array<IPlayer> = [];
 
-    players = await db.getPlayersFromTeam(this.selectedTeam!) || [];
+    players = await this.db.getPlayersFromTeam(this.selectedTeam!, this.selectedSeason!) || [];
 
     if (!players || players.length <= 0) {
-      players = await this.fetchPlayersFromTeam();
-      db.addPlayers(players);
+      players = await firstValueFrom(this.fetchApi.fetchPlayersFromTeam(this.selectedTeam!, this.selectedSeason!));
+      await this.db.addPlayers(players);
     }
 
     this.players$.next(players);
-  }
-
-  async fetchCountries() {
-    const countries: Array<ICountry> = await firstValueFrom(this.http.get('').pipe(
-      map((data: any) => data.response),
-      catchError((err, caught) => caught)
-    ));
-
-    return countries;
-  }
-  
-  async fetchLeaguesFromCountry() {
-    const leagues: Array<ILeague> = await firstValueFrom(this.http.get('').pipe(
-      map((data: any) => {
-        const parsedLeagues = data.response.map((item: any) => ({
-          id: item.league.id,
-          name: item.league.name,
-          logo: item.league.logo,
-          countryCode: item.country.code
-        }));
-        
-        return parsedLeagues;
-      }),
-      catchError((err, caught) => caught)
-    ));
-
-    return leagues;
-  }
-
-  async fetchTeamsFromLeague() {
-    const teams: Array<ITeam> = await firstValueFrom(this.http.get('').pipe(
-      map((data: any) => {
-        const parsedTeams = data.response.map((item: any) => {
-          const statistics = {
-            games: item.fixtures.played.total,
-            wins: item.fixtures.wins.total,
-            draws: item.fixtures.draws.total,
-            losses: item.fixtures.losses.total,
-          };
-
-          return {
-            id: item.team.id,
-            name: item.team.name,
-            logo: item.team.logo,
-            leagueId: item.league.id,
-            lineups: item.lineups,
-            goals: item.goals.for.minute,
-            statistics
-          }
-        });
-
-        return parsedTeams;
-      }),
-      catchError((err, caught) => caught)
-    ));
-
-    return teams;
-  }
-  
-  async fetchSeasonsFromTeam() {
-    const seasons: Array<number> = await firstValueFrom(this.http.get('').pipe(map((data: any) => data.response)));
-
-    return seasons;
-  }
-
-  async fetchPlayersFromTeam() {
-    const players: Array<IPlayer> = await firstValueFrom(this.http.get('').pipe(
-      map((data: any) => {
-        const parsedPlayers = data.response.map((item: any) => ({
-          id: item.player.id,
-          name: item.player.name,
-          age: item.player.age,
-          nationality: item.player.nationality,
-          teamId: this.selectedTeam
-        }));
-        return parsedPlayers;
-      }),
-      catchError((err, caught) => caught)
-    ));
-
-    return players;
   }
 
 }

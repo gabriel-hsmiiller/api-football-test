@@ -15,6 +15,11 @@ import { FooterComponent } from './components/footer/footer.component';
 import { MainSectionComponent } from './components/main-section/main-section.component';
 import { LoginComponent } from './components/login/login.component';
 import { HttpClientModule } from '@angular/common/http';
+import { PlayersListComponent } from './components/main-section/players-list/players-list.component';
+import { LineupsComponent } from './components/main-section/lineups/lineups.component';
+import { StatisticsComponent } from './components/main-section/statistics/statistics.component';
+import { GoalsComponent } from './components/main-section/goals/goals.component';
+import { NgChartsModule } from 'ng2-charts';
 
 
 @NgModule({
@@ -23,13 +28,18 @@ import { HttpClientModule } from '@angular/common/http';
     HeaderComponent,
     FooterComponent,
     MainSectionComponent,
-    LoginComponent
+    LoginComponent,
+    PlayersListComponent,
+    LineupsComponent,
+    StatisticsComponent,
+    GoalsComponent
   ],
   imports: [
     BrowserModule,
     HttpClientModule,
     AppRoutingModule,
     BrowserAnimationsModule,
+    NgChartsModule,
     MatIconModule,
     MatTabsModule,
     MatFormFieldModule,

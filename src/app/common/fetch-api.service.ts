@@ -1,24 +1,50 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { map, catchError, timeout, filter, tap } from 'rxjs';
+import { map, catchError, timeout, filter } from 'rxjs';
 import { ICountry } from '../models/country';
 import { ILeague } from '../models/league';
 import { ITeam } from '../models/team';
 import { IPlayer } from '../models/player';
+import { AuthService } from './auth.service';
+import { environment } from 'src/environments/environment';
+
+const env = environment;
 
 @Injectable({
   providedIn: 'root'
 })
 export class FetchApiService {
   
-  private _headers: HttpHeaders = new HttpHeaders()
-    .set('x-rapidapi-key', '')
-    .set('x-rapidapi-host', 'v3.football.api-sports.io');
+  private _headers: HttpHeaders;
 
-  constructor(private http: HttpClient) { }
+  private _apiToken;
+
+  constructor(private http: HttpClient, private authService: AuthService) {
+    this._apiToken = this.authService.Token;
+
+    this._headers = new HttpHeaders()
+      .set('x-rapidapi-host', env.rapidApiHost)
+      .set('x-rapidapi-key', this._apiToken!);
+  }
+  
+  getUserInformation(token: string) {
+    const provisoryHeaders = new HttpHeaders()
+      .set('x-rapidapi-host', env.rapidApiHost)
+      .set('x-rapidapi-key', token);
+
+    return this.http.get(`${env.apiUrl}/status`, { headers: provisoryHeaders }).pipe(
+      map((data: any) => {        
+        return {
+          name: data.response?.account?.firstname || null,
+          email: data.response?.account?.email || null,
+          isActive: data.response?.subscription?.active || false
+        }
+      })
+    );
+  }
 
   fetchCountries() {
-    return this.http.get('https://v3.football.api-sports.io/countries', { headers: this._headers }).pipe(
+    return this.http.get(`${env.apiUrl}/countries`, { headers: this._headers }).pipe(
       filter((response: any) => (response.errors && response.errors.length <= 0) || !response.message),
       timeout(10_000),
       catchError((err, caught) => caught),
@@ -27,7 +53,7 @@ export class FetchApiService {
   }
   
   fetchLeaguesFromCountry(countryCode: string) {
-    return this.http.get(`https://v3.football.api-sports.io/leagues?code=${countryCode}`, { headers: this._headers }).pipe(
+    return this.http.get(`${env.apiUrl}/leagues?code=${countryCode}`, { headers: this._headers }).pipe(
       filter((response: any) => (response.errors && response.errors.length <= 0) || !response.message),
       timeout(10_000),
       catchError((err, caught) => caught),
@@ -45,7 +71,7 @@ export class FetchApiService {
   }
 
   fetchTeamsFromLeague(leagueId: number, season: number) {
-    return this.http.get(`https://v3.football.api-sports.io/teams?league=${leagueId}&season=${season}`, { headers: this._headers }).pipe(
+    return this.http.get(`${env.apiUrl}/teams?league=${leagueId}&season=${season}`, { headers: this._headers }).pipe(
       filter((response: any) => (response.errors && response.errors.length <= 0) || !response.message),
       timeout(10_000),
       catchError((err, caught) => caught),
@@ -66,7 +92,7 @@ export class FetchApiService {
   }
 
   fetchDetailsFromTeam(teamId: number, leagueId: number, season: number) {
-    return this.http.get(`https://v3.football.api-sports.io/teams/statistics?team=${teamId}&league=${leagueId}&season=${season}`, { headers: this._headers }).pipe(
+    return this.http.get(`${env.apiUrl}/teams/statistics?team=${teamId}&league=${leagueId}&season=${season}`, { headers: this._headers }).pipe(
       filter((response: any) => (response.errors && response.errors.length <= 0) || !response.message),
       timeout(10_000),
       catchError((err, caught) => caught),
@@ -95,7 +121,7 @@ export class FetchApiService {
   }
   
   fetchSeasonsFromLeague() {
-    return this.http.get(`https://v3.football.api-sports.io/leagues/seasons`, { headers: this._headers }).pipe(
+    return this.http.get(`${env.apiUrl}/leagues/seasons`, { headers: this._headers }).pipe(
       filter((response: any) => (response.errors && response.errors.length <= 0) || !response.message),
       timeout(10_000),
       catchError((err, caught) => caught),
@@ -104,7 +130,7 @@ export class FetchApiService {
   }
 
   fetchPlayersFromTeam(teamId: number, season: number) {
-    return this.http.get(`https://v3.football.api-sports.io/players?team=${teamId}&season=${season}`, { headers: this._headers }).pipe(
+    return this.http.get(`${env.apiUrl}/players?team=${teamId}&season=${season}`, { headers: this._headers }).pipe(
       filter((response: any) => (response.errors && response.errors.length <= 0) || !response.message),
       timeout(10_000),
       catchError((err, caught) => caught),

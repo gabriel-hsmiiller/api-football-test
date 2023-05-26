@@ -1,1 +1,13 @@
-<p>login works!</p>
+<section class="login-container d-flex justify-content-center align-items-center">
+    <div class="w-md-50 w-xs-100 p-5 border rounded border-success">
+        <p>Para acessar o conteúdo, informe a token fornecida em <a href="https://dashboard.api-football.com/login/">dashboard.api-football.com</a></p>
+        <mat-form-field appearance="outline" class="w-100">
+            <input matInput type="text" [formControl]="tokenInputFormControl" placeholder="Token">
+            <mat-error *ngIf="tokenInputFormControl.hasError('required')">Informe uma token</mat-error>
+            <mat-error *ngIf="tokenInputFormControl.hasError('invalidToken')">A token informada não existe ou está inativa</mat-error>
+            <button mat-icon-button matSuffix color="primary" (click)="saveToken()">
+                <mat-icon>login</mat-icon>
+            </button>
+        </mat-form-field>
+    </div>
+</section>

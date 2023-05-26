@@ -1,9 +1,13 @@
-<header #header class="w-100 d-flex justify-content-between p-3 border-bottom border-success">
+<header #header class="w-100 d-flex justify-content-between p-3 border-bottom border-success flex-column flex-md-row">
     <img src="assets/images/logo-meu-time.svg" height="40" />
-    <div>
-        <button class="btn d-flex align-items-center login-btn">
-            <mat-icon fontIcon="person"></mat-icon>
-            <span>Login</span>
+    <div class="flex-grow-1 d-flex align-items-center justify-content-center justify-content-md-end px-3">
+        <span class="text-success" *ngIf="this.authService.Name">Olá, {{this.authService.Name}}</span>
+    </div>
+    <mat-divider vertical></mat-divider>
+    <div class="d-flex align-items-center justify-content-center justify-content-md-end px-2" *ngIf="(authService.isAuthenticated$ | async)">
+        <button class="btn d-flex align-items-center login-btn" (click)="clearToken()">
+            <mat-icon>logout</mat-icon>
+            <span>Entrar com outra token</span>
         </button>
     </div>
 </header>

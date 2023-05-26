@@ -1,9 +1,10 @@
 <section #section class="w-100 p-4">
-    <div class="d-flex flex-md-row flex-sm-column">
+    <div class="d-flex flex-md-row flex-column">
         <div class="mx-3">
             <mat-form-field class="d-flex flex-column align-items-stretch" appearance="outline">
                 <mat-label>Selecione um país</mat-label>
-                <mat-select [(value)]="mainSectionService.selectedCountry" (selectionChange)="onSelectCountry()">
+                <mat-select [(value)]="mainSectionService.selectedCountry" (selectionChange)="onSelectCountry()"
+                    [disabled]=" (mainSectionService.countries$ | async)!.length <= 0">
                     <mat-option [value]="country.code" *ngFor="let country of (mainSectionService.countries$ | async)">
                         <img [src]="country.flag" height="24" />
                         <span class="mx-2">{{ country.name }}</span>
@@ -13,7 +14,8 @@
 
             <mat-form-field class="d-flex flex-column align-items-stretch" appearance="outline">
                 <mat-label>Selecione uma liga</mat-label>
-                <mat-select [(value)]="mainSectionService.selectedLeague" (selectionChange)="onSelectLeague()" [disabled]="!mainSectionService.selectedCountry">
+                <mat-select [(value)]="mainSectionService.selectedLeague" (selectionChange)="onSelectLeague()" 
+                    [disabled]="!mainSectionService.selectedCountry && (mainSectionService.leagues$ | async)!.length <= 0">
                     <mat-option [value]="league.id" *ngFor="let league of (mainSectionService.leagues$ | async)">
                         <img [src]="league.logo" height="24" />
                         <span class="mx-2">{{ league.name }}</span>
@@ -23,14 +25,16 @@
 
             <mat-form-field class="d-flex flex-column align-items-stretch" appearance="outline">
                 <mat-label>Selecione uma temporada</mat-label>
-                <mat-select [(value)]="mainSectionService.selectedSeason" (selectionChange)="onSelectSeason()" [disabled]="!mainSectionService.selectedLeague">
+                <mat-select [(value)]="mainSectionService.selectedSeason" (selectionChange)="onSelectSeason()"
+                    [disabled]="!mainSectionService.selectedLeague &&  (mainSectionService.seasons$ | async)!.length <= 0">
                     <mat-option [value]="season" *ngFor="let season of (mainSectionService.seasons$ | async)">Ano {{ season }}</mat-option>
                 </mat-select>
             </mat-form-field>
 
             <mat-form-field class="d-flex flex-column align-items-stretch" appearance="outline">
                 <mat-label>Selecione um time</mat-label>
-                <mat-select [(value)]="mainSectionService.selectedTeam" (selectionChange)="onSelectTeam()" [disabled]="!mainSectionService.selectedSeason">
+                <mat-select [(value)]="mainSectionService.selectedTeam" (selectionChange)="onSelectTeam()"
+                    [disabled]="!mainSectionService.selectedSeason && (mainSectionService.teams$ | async)!.length <= 0">
                     <mat-option [value]="team.id" *ngFor="let team of (mainSectionService.teams$ | async)">
                         <img [src]="team.logo" height="24" />
                         <span class="mx-2">{{ team.name }}</span>
@@ -39,7 +43,7 @@
             </mat-form-field>
         </div>
         <mat-divider [vertical]="true"></mat-divider>
-        <div class="flex-grow-1">
+        <div class="flex-grow-1 mb-3">
             <mat-tab-group dynamicHeight color="primary" animationDuration="0ms">
                 <mat-tab label="Jogadores">
                     <div class="p-2" *ngIf="!mainSectionService.selectedTeam">
@@ -62,14 +66,14 @@
                     <div class="p-2" *ngIf="!mainSectionService.selectedTeam">
                         Selecione um time para ver as formações utilizadas
                     </div>
-                    <div class="p-2" *ngIf="mainSectionService.selectedTeam">
-                        <div class="d-flex flex-md-row flex-sm-column-reverse align-items-start">
+                    <div class="p-2" *ngIf="mainSectionService.selectedTeam && (mainSectionService.selectedTeamInformation$ | async)?.lineups && (mainSectionService.selectedTeamInformation$ | async)?.lineups!.length > 0">
+                        <div class="d-flex flex-md-row flex-column-reverse align-items-start">
                             <div class="position-relative">
-                                <img src="assets/images/camp.svg" height="600" />
-                                <div *ngIf="lineupPositions.length > 0" class="d-flex flex-row position-absolute positions-row">
+                                <img src="assets/images/camp.svg" class="w-100" />
+                                <div *ngIf="lineupPositions.length > 0" class="d-flex flex-row position-absolute positions-row align-items-center">
                                     <div class="rounded-circle"></div>
                                 </div>
-                                <div *ngFor="let row of lineupPositions" class="d-flex flex-row position-absolute positions-row">
+                                <div *ngFor="let row of lineupPositions" class="d-flex flex-row position-absolute positions-row align-items-center">
                                     <div class="rounded-circle" *ngFor="let pos of row"></div>
                                 </div>
                             </div>
@@ -81,49 +85,52 @@
                             </div>
                         </div>
                     </div>
+                    <div class="p-2" *ngIf="!(mainSectionService.selectedTeamInformation$ | async)?.lineups || (mainSectionService.selectedTeamInformation$ | async)?.lineups!.length <= 0">
+                        Não foram encontrados dados das formações para o time e temporada selecionados
+                    </div>
                 </mat-tab>
                 <mat-tab label="Resultados">
                     <div class="p-2" *ngIf="!mainSectionService.selectedTeam">
                         Selecione um time para ver os resultados
                     </div>
                     <div class="p-2" *ngIf="mainSectionService.selectedTeam">
-                        <div>
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Total de jogos</th>
-                                        <th>Vitórias</th>
-                                        <th>Derrotas</th>
-                                        <th>Empates</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>{{ (mainSectionService.selectedTeamInformation$ | async)?.statistics?.games }}</td>
-                                        <td>{{ (mainSectionService.selectedTeamInformation$ | async)?.statistics?.wins }}</td>
-                                        <td>{{ (mainSectionService.selectedTeamInformation$ | async)?.statistics?.losses }}</td>
-                                        <td>{{ (mainSectionService.selectedTeamInformation$ | async)?.statistics?.draws }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Total de jogos</th>
+                                    <th scope="col">Vitórias</th>
+                                    <th scope="col">Derrotas</th>
+                                    <th scope="col">Empates</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th scope="row">{{ (mainSectionService.selectedTeamInformation$ | async)?.statistics?.games }}</th>
+                                    <td class="text-success">{{ (mainSectionService.selectedTeamInformation$ | async)?.statistics?.wins }}</td>
+                                    <td class="text-danger">{{ (mainSectionService.selectedTeamInformation$ | async)?.statistics?.losses }}</td>
+                                    <td class="text-primary">{{ (mainSectionService.selectedTeamInformation$ | async)?.statistics?.draws }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </mat-tab>
                 <mat-tab label="Gols">
                     <div class="p-2" *ngIf="!mainSectionService.selectedTeam">
                         Selecione um time para ver os gols
                     </div>
-                    <div class="p-2 d-flex justify-content-center" *ngIf="mainSectionService.selectedTeam">
-                        <div class="w-50">
-                            <h3 class="text-success align-center">Porcentagem de gols por minuto</h3>
-
-                            <canvas baseChart
-                                type="pie"
-                                [datasets]="pieChartDatasets"
-                                [labels]="pieChartLabels"
-                                [options]="pieChartOptions"
-                                [legend]="pieChartLegend">
-                            </canvas>
+                    <div class="container p-2 d-flex justify-content-center mb-5" *ngIf="mainSectionService.selectedTeam">
+                        <div class="row">
+                            <div class="col-12">
+                                <h3 class="text-success text-center">Porcentagem de gols por minuto</h3>
+    
+                                <canvas baseChart
+                                    type="pie"
+                                    [datasets]="pieChartDatasets"
+                                    [labels]="pieChartLabels"
+                                    [options]="pieChartOptions"
+                                    [legend]="pieChartLegend">
+                                </canvas>
+                            </div>
                         </div>
                     </div>
                 </mat-tab>

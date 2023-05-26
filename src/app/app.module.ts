@@ -7,6 +7,8 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDividerModule } from '@angular/material/divider'
+import { MatInputModule } from '@angular/material/input'
+import { MatButtonModule } from '@angular/material/button'
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -20,6 +22,7 @@ import { LineupsComponent } from './components/main-section/lineups/lineups.comp
 import { StatisticsComponent } from './components/main-section/statistics/statistics.component';
 import { GoalsComponent } from './components/main-section/goals/goals.component';
 import { NgChartsModule } from 'ng2-charts';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 
 @NgModule({
@@ -39,12 +42,16 @@ import { NgChartsModule } from 'ng2-charts';
     HttpClientModule,
     AppRoutingModule,
     BrowserAnimationsModule,
+    FormsModule,
+    ReactiveFormsModule,
     NgChartsModule,
     MatIconModule,
     MatTabsModule,
     MatFormFieldModule,
     MatSelectModule,
     MatDividerModule,
+    MatInputModule,
+    MatButtonModule
   ],
   providers: [],
   bootstrap: [AppComponent]

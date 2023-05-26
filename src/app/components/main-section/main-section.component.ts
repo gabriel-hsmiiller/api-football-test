@@ -1,9 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { ChartOptions } from 'chart.js';
 import { MainSectionService } from './main-section.service';
 import { ILineup } from 'src/app/models/lineup';
-import { ChartOptions } from 'chart.js';
-
-import 'chartjs-plugin-labels';
 
 @Component({
   selector: 'app-main-section',
@@ -15,7 +13,7 @@ export class MainSectionComponent implements OnInit {
   public lineupPositions: Array<Array<number>> = [];
 
   public pieChartOptions: ChartOptions<'pie'> = { responsive: true }
-  public pieChartLabels = ['0-15' , '16-30', '31-45', '46-60', '61-75', '76-90', '91-105', '106-120'];
+  public pieChartLabels = ['0\'-15\'' , '16\'-30\'', '31\'-45\'', '46\'-60\'', '61\'-75\'', '76\'-90\'', '91\'-105\'', '106\'-120\''];
   public pieChartDatasets = [ { data: [] as any[], backgroundColor: ['#83ab80', '#51894d', '#2c7026', '#075700', '#064f00', '#054600', '#043c00', '#022c00'] } ];
   public pieChartLegend = true;
 
@@ -61,7 +59,7 @@ export class MainSectionComponent implements OnInit {
     const teamDetails = this.mainSectionService.selectedTeamInformation$.value;
 
     Object.values(teamDetails!.goals).forEach((value) => {
-      const number = +value.percentage.replace('%', '');
+      const number = +value.percentage?.replace('%', '');
       this.pieChartDatasets[0].data.push(number);
     });
   }

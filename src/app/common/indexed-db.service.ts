@@ -15,8 +15,8 @@ export class IndexedDbService extends Dexie {
 
   constructor() {
     super('meuTimeDB');
-    this.version(6).stores({
-      countries: 'code',
+    this.version(7).stores({
+      countries: 'id++, code',
       leagues: 'id, countryCode',
       teams: '_idb++, id, [leagueId+season], [id+season]',
       players: '_idb++, id, [teamId+season]'
